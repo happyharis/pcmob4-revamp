@@ -19,7 +19,9 @@ export default function NotesScreenHome() {
     const q = query(collection(db, "notes"));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const posts = querySnapshot.docs.map((doc) => doc.data());
+      const posts = querySnapshot.docs.map((doc, index) => {
+        return { ...doc.data(), id: index };
+      });
       setNotes(posts);
     });
 
