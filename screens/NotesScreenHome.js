@@ -8,7 +8,13 @@ import {
   View,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { collection, onSnapshot, query } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+} from "firebase/firestore";
 import { db } from "../firebase";
 
 export default function NotesScreenHome() {
@@ -20,7 +26,7 @@ export default function NotesScreenHome() {
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const posts = querySnapshot.docs.map((doc, index) => {
-        return { ...doc.data(), id: index };
+        return { ...doc.data(), id: index, docId: doc.id };
       });
       setNotes(posts);
     });
@@ -34,7 +40,11 @@ export default function NotesScreenHome() {
     return (
       <View style={styles.noteCard}>
         <Text style={styles.noteCardTitle}>{item.title}</Text>
-        <TouchableOpacity onPress={() => {}}>
+        <TouchableOpacity
+          onPress={async () => {
+            await deleteDoc(doc(db, "notes", item.docId));
+          }}
+        >
           <FontAwesome name={"remove"} size={24} color={"black"} />
         </TouchableOpacity>
       </View>
