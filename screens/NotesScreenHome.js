@@ -1,5 +1,5 @@
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -8,13 +8,25 @@ import {
   View,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import { collection, onSnapshot, query } from "firebase/firestore";
+import { db } from "../firebase";
 
 export default function NotesScreenHome() {
   const navigation = useNavigation();
+  const [notes, setNotes] = useState([]);
 
-  const posts = [
-    { title: "Add new notes", content: "New notes are everything", id: "1" },
-  ];
+  useEffect(() => {
+    const q = query(collection(db, "notes"));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const posts = querySnapshot.docs.map((doc) => doc.data());
+      setNotes(posts);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   function renderItem({ item }) {
     return (
@@ -31,7 +43,7 @@ export default function NotesScreenHome() {
       <Text style={styles.title}>notes</Text>
 
       <FlatList
-        data={posts}
+        data={notes}
         renderItem={renderItem}
         keyExtractor={(post) => post.id.toString()}
       />
